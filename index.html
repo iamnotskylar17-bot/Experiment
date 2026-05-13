@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Monash University - Research Study</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { width: 100%; height: 100%; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #fff; overflow: hidden; }
+
+        #consent-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; overflow-y: auto; padding: 0 24px; }
+        .monash-header { padding: 30px 0; border-bottom: 1px solid #eef2f6; margin-bottom: 30px; text-align: center; }
+        .monash-header img { height: 50px; object-fit: contain; }
+        .consent-content { max-width: 750px; margin: 0 auto; color: #000; padding-bottom: 100px; text-align: left; }
+        .consent-title { font-size: 22px; font-weight: bold; margin-bottom: 25px; line-height: 1.3; color: #000; }
+        .info-section { margin-bottom: 20px; font-size: 14.5px; line-height: 1.6; color: #333; }
+        .info-section p { margin-bottom: 15px; }
+        .project-details { margin: 20px 0; font-size: 14.5px; line-height: 1.8; }
+        .statements-title { font-weight: bold; margin: 30px 0 15px 0; font-size: 16px; border-top: 1px solid #eee; padding-top: 20px; }
+        .statement-list { list-style: none; }
+        .statement-list li { position: relative; padding-left: 30px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; color: #444; }
+        .statement-list li::before { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; position: absolute; left: 0; color: #003087; }
+        .option-group { margin-top: 35px; }
+        .option-item { display: flex; align-items: center; padding: 18px; border: 1px solid #ddd; margin-bottom: 12px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        .option-item:hover { background: #f4f7f9; border-color: #003087; }
+        .option-item input { margin-right: 15px; width: 20px; height: 20px; flex-shrink: 0; }
+        .option-item label { cursor: pointer; font-size: 14.5px; font-weight: 500; color: #333; }
+        .next-area { display: flex; justify-content: flex-end; margin-top: 40px; }
+        .qualtrics-btn { background-color: #003087; color: white; border: none; padding: 12px 40px; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+
+        #experiment-page { width: 100%; height: 100%; background: #000; display: none; position: relative; }
+        .top-nav { position: absolute; top: 0; width: 100%; display: flex; justify-content: center; align-items: center; padding-top: 50px; z-index: 100; color: rgba(255,255,255,0.6); font-size: 17px; font-weight: 600; }
+        .top-nav span { margin: 0 12px; }
+        .top-nav .active { color: #fff; position: relative; }
+        .top-nav .active::after { content: ''; position: absolute; bottom: -8px; left: 25%; width: 50%; height: 2px; background: #fff; }
+        .search-icon { position: absolute; right: 20px; font-size: 20px; color: #fff; }
+        #timer-box { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.5); color: #fff; padding: 5px 15px; border-radius: 20px; z-index: 1000; font-size: 12px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px); min-width: 200px; text-align: center; }
+        #video-container { width: 100%; height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; }
+        .video-card { position: relative; width: 100%; height: 100vh; scroll-snap-align: start; scroll-snap-stop: always; }
+        video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        .video-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.72); font-size: 13px; letter-spacing: 0; pointer-events: none; z-index: 2; opacity: 0; transition: opacity 0.2s ease; }
+        .video-card.loading .video-loading { opacity: 1; }
+        .side-bar { position: absolute; right: 8px; bottom: 96px; display: flex; flex-direction: column; align-items: center; z-index: 10; }
+        .avatar-box { position: relative; margin-bottom: 20px; }
+        .avatar-box img { width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid #fff; }
+        .side-icon { margin-top: 18px; text-align: center; color: #fff; cursor: pointer; }
+        .side-icon i { font-size: 30px; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+        .side-icon span { font-size: 11px; display: block; margin-top: 4px; font-weight: 500; }
+        .active-heart { color: #fe2c55 !important; }
+        .active-star { color: #facc15 !important; }
+        .bottom-fake-nav { position: absolute; bottom: 0; width: 100%; height: 64px; padding-bottom: env(safe-area-inset-bottom); border-top: 0.5px solid rgba(255,255,255,0.1); background: linear-gradient(transparent, rgba(0,0,0,0.9)); display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; color: #888; font-size: 10px; z-index: 1001; }
+        .nav-item { text-align: center; min-width: 0; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 2px; }
+        .nav-item.white { color: #fff; }
+        .finish-slot { display: flex; justify-content: center; align-items: center; }
+        #submit-btn { width: 46px; height: 46px; opacity: 0; transform: translateY(6px) scale(0.96); background: rgba(254,44,85,0.94); color: #fff; border: none; border-radius: 50%; font-size: 18px; cursor: pointer; transition: opacity 0.25s ease, transform 0.25s ease; pointer-events: none; box-shadow: 0 6px 18px rgba(0,0,0,0.28); }
+        #submit-btn.ready { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+        #submit-btn:disabled { cursor: default; }
+    </style>
+</head>
+<body>
+    <div id="consent-page">
+        <div class="monash-header">
+            <img src="https://raw.githubusercontent.com/iamnotskylar17-bot/Experiment/main/monash-logo.svg" alt="Monash University Logo">
+        </div>
+        <div class="consent-content">
+            <h1 class="consent-title">Participant Information Statement</h1>
+            <div class="info-section">
+                <p>Dear Participant,</p>
+                <p>You are invited to participate in this research project conducted by Monash University. Before deciding whether to participate, please read this information statement carefully and in full. If you would like to obtain any additional information about this project, please feel free to contact the researcher via the email address provided below.</p>
+            </div>
+            <div class="project-details">
+                <p><strong>Project ID: 44026</strong></p>
+                <p><strong>Project title: The Illusion of Plenty: AI-Driven Content Abundance, Perceived Overload, and Manipulative Intent in Social Media Fatigue</strong></p>
+                <p><strong>Project Contact: Si Yang (PhD Candidate)</strong></p>
+                <p><strong>Email: si.yang@monash.edu</strong></p>
+            </div>
+            <div class="statements-title">Consent Declaration</div>
+            <div class="info-section">
+                <p>I have been invited to participate in the above-mentioned research project conducted by Monash University, and I have read and understood the Participant Information Statement. I hereby confirm that:</p>
+                <ul class="statement-list">
+                    <li>I am aged 18 years or older.</li>
+                    <li>I am an active user of social media (e.g., TikTok, Instagram, etc.).</li>
+                    <li>I agree to participate in this research and to provide research data through an online questionnaire.</li>
+                    <li>I understand that participation in this research is voluntary, and that I may withdraw at any time before submitting the questionnaire without providing any reason.</li>
+                    <li>I understand that once the questionnaire has been submitted, the submitted data cannot be withdrawn.</li>
+                    <li>I understand that there are no right or wrong answers in this questionnaire, and I will answer based on my genuine situation and actual experiences.</li>
+                    <li>I understand that the information I provide will be kept confidential.</li>
+                    <li>I understand that no personally identifiable information, including my name, will appear in research reports or academic publications.</li>
+                    <li>I understand that the data collected in this study may be de-identified and used for academic research and publications.</li>
+                    <li>I understand that by ticking the "Yes" box below, I am providing my informed consent to participate.</li>
+                </ul>
+            </div>
+            <div class="option-group">
+                <div class="option-item" onclick="document.getElementById('c-yes').checked=true">
+                    <input type="radio" name="consent" id="c-yes">
+                    <label for="c-yes">Yes, I have read and understood the information and agree to participate.</label>
+                </div>
+                <div class="option-item" onclick="document.getElementById('c-no').checked=true">
+                    <input type="radio" name="consent" id="c-no">
+                    <label for="c-no">No, I do not agree to participate.</label>
+                </div>
+            </div>
+            <div class="next-area">
+                <button class="qualtrics-btn" onclick="handleConsent()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="experiment-page">
+        <div id="timer-box">Please browse for <span id="sec">30</span>s to unlock</div>
+        <div class="top-nav">
+            <span>热点</span><span>关注</span><span class="active">推荐</span>
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        </div>
+        <div id="video-container"></div>
+        <div class="bottom-fake-nav">
+            <div class="nav-item white"><i class="fa-solid fa-house"></i>首页</div>
+            <div class="nav-item"><i class="fa-solid fa-users"></i>朋友</div>
+            <div class="finish-slot">
+                <button id="submit-btn" onclick="sendToQualtrics()" disabled aria-label="Finish" title="Finish">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+            <div class="nav-item"><i class="fa-solid fa-comment-dots"></i>消息</div>
+            <div class="nav-item"><i class="fa-solid fa-user"></i>我</div>
+        </div>
+    </div>
+
+    <script>
+        const QUALTRICS_URL = "https://monash.syd1.qualtrics.com/jfe/form/SV_2iBbNbqJ0fByavs";
+        const GITHUB_USER = "iamnotskylar17-bot";
+        const GROUP_CONFIG = {
+            Group1: ["1.MP4", "2.MP4", "3.MP4"],
+            Group2: ["1.MP4", "2.MP4", "3.MP4", "4.MP4"]
+        };
+
+        const REPO_LIST = Object.keys(GROUP_CONFIG);
+        const selectedGroup = REPO_LIST[Math.floor(Math.random() * REPO_LIST.length)];
+        const VIDEO_FILES = GROUP_CONFIG[selectedGroup];
+        const GITHUB_BASE = `https://raw.githubusercontent.com/${GITHUB_USER}/${selectedGroup}/main/`;
+        const participantID = "SK-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
+        const MAX_WIDE_VIDEO_ROWS = 40;
+
+        const videoLogs = {};
+        let activeVideoFile = null;
+        let activeViewStart = null;
+        let activeVideoIndex = 0;
+        let hasRenderedVideos = false;
+        let timerStarted = false;
+
+        window.addEventListener("load", () => {
+            document.getElementById("consent-page").style.display = "block";
+            document.getElementById("experiment-page").style.display = "none";
+            document.getElementById("c-yes").checked = false;
+            document.getElementById("c-no").checked = false;
+        });
+
+        function handleConsent() {
+            if (!document.getElementById("c-yes").checked) {
+                alert("Please consent to continue.");
+                return;
+            }
+
+            document.getElementById("consent-page").style.display = "none";
+            document.getElementById("experiment-page").style.display = "block";
+
+            if (!hasRenderedVideos) {
+                renderVideos();
+                hasRenderedVideos = true;
+            }
+
+            const firstVideo = document.querySelector(".video-card video");
+            if (firstVideo) {
+                activateVideo(VIDEO_FILES[0], firstVideo, 0);
+            }
+
+            if (!timerStarted) {
+                startTimer();
+                timerStarted = true;
+            }
+        }
+
+        function renderVideos() {
+            const container = document.getElementById("video-container");
+            container.innerHTML = "";
+
+            VIDEO_FILES.forEach((fileName, index) => {
+                videoLogs[fileName] = {
+                    file: fileName,
+                    order: index + 1,
+                    watchSeconds: 0,
+                    viewCount: 0,
+                    like: 0,
+                    favorite: 0,
+                    manualPauseCount: 0
+                };
+
+                const card = document.createElement("div");
+                card.className = "video-card loading";
+                card.dataset.file = fileName;
+                card.dataset.index = String(index);
+                card.innerHTML = `
+                    <video loop playsinline preload="none" data-src="${GITHUB_BASE}${fileName}" onclick="togglePlay(this, '${fileName}')"></video>
+                    <div class="video-loading">Loading...</div>
+                    <div class="side-bar">
+                        <div class="avatar-box">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${fileName}" alt="">
+                        </div>
+                        <div class="side-icon" onclick="act(this,'${fileName}','L')">
+                            <i class="fa-solid fa-heart"></i>
+                            <span>${(Math.random() * 100).toFixed(1)}万</span>
+                        </div>
+                        <div class="side-icon">
+                            <i class="fa-solid fa-comment-dots"></i>
+                            <span>${Math.floor(Math.random() * 5000)}</span>
+                        </div>
+                        <div class="side-icon" onclick="act(this,'${fileName}','F')">
+                            <i class="fa-solid fa-star"></i>
+                            <span>${(Math.random() * 10).toFixed(1)}万</span>
+                        </div>
+                        <div class="side-icon">
+                            <i class="fa-solid fa-share"></i>
+                            <span>${Math.floor(Math.random() * 1000)}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+
+                const video = card.querySelector("video");
+                video.addEventListener("canplay", () => card.classList.remove("loading"));
+                video.addEventListener("playing", () => card.classList.remove("loading"));
+                video.addEventListener("waiting", () => card.classList.add("loading"));
+                video.addEventListener("error", () => {
+                    card.classList.add("loading");
+                    card.querySelector(".video-loading").textContent = "Video is loading slowly";
+                });
+            });
+
+            prepareNearbyVideos(0);
+            initVideoObserver();
+        }
+
+        function togglePlay(video, fileName) {
+            if (video.paused) {
+                ensureVideoLoaded(video);
+                playVideo(video);
+            } else {
+                video.pause();
+                videoLogs[fileName].manualPauseCount += 1;
+            }
+        }
+
+        function ensureVideoLoaded(video) {
+            if (video.src) {
+                return;
+            }
+
+            video.src = video.dataset.src;
+            video.load();
+        }
+
+        function playVideo(video) {
+            video.muted = false;
+            video.volume = 1;
+            video.play().catch(() => {
+                video.muted = true;
+                video.play().catch(() => {});
+            });
+        }
+
+        function prepareNearbyVideos(centerIndex) {
+            const cards = [...document.querySelectorAll(".video-card")];
+
+            cards.forEach((card, index) => {
+                const video = card.querySelector("video");
+                const distance = Math.abs(index - centerIndex);
+
+                if (distance <= 2) {
+                    ensureVideoLoaded(video);
+                    video.preload = index === centerIndex ? "auto" : "metadata";
+                } else if (distance > 4 && video.src) {
+                    video.pause();
+                    video.removeAttribute("src");
+                    video.load();
+                    card.classList.add("loading");
+                }
+            });
+        }
+
+        function initVideoObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    const card = entry.target;
+                    const video = card.querySelector("video");
+                    const fileName = card.dataset.file;
+
+                    if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+                        activateVideo(fileName, video, Number(card.dataset.index));
+                    }
+                });
+            }, { threshold: [0.6] });
+
+            document.querySelectorAll(".video-card").forEach((card) => observer.observe(card));
+        }
+
+        function activateVideo(fileName, video, index) {
+            if (activeVideoFile === fileName) {
+                return;
+            }
+
+            stopActiveVideoTimer();
+            activeVideoIndex = index;
+            prepareNearbyVideos(activeVideoIndex);
+            document.querySelectorAll("video").forEach((item) => {
+                if (item !== video) item.pause();
+            });
+
+            activeVideoFile = fileName;
+            activeViewStart = Date.now();
+            videoLogs[fileName].viewCount += 1;
+            ensureVideoLoaded(video);
+            playVideo(video);
+        }
+
+        function stopActiveVideoTimer() {
+            if (!activeVideoFile || !activeViewStart) {
+                return;
+            }
+
+            const elapsedSeconds = (Date.now() - activeViewStart) / 1000;
+            videoLogs[activeVideoFile].watchSeconds += elapsedSeconds;
+            activeViewStart = null;
+        }
+
+        function startTimer() {
+            let left = 30;
+            const btn = document.getElementById("submit-btn");
+            const timerBox = document.getElementById("timer-box");
+
+            const timer = setInterval(() => {
+                left -= 1;
+                document.getElementById("sec").innerText = left;
+
+                if (left <= 0) {
+                    clearInterval(timer);
+                    btn.disabled = false;
+                    btn.classList.add("ready");
+                    timerBox.innerHTML = "Requirement met. You can submit now.";
+                    timerBox.style.background = "rgba(46, 204, 113, 0.6)";
+                }
+            }, 1000);
+        }
+
+        function act(element, fileName, type) {
+            if (type === "L") {
+                element.classList.toggle("active-heart");
+                videoLogs[fileName].like = element.classList.contains("active-heart") ? 1 : 0;
+            }
+
+            if (type === "F") {
+                element.classList.toggle("active-star");
+                videoLogs[fileName].favorite = element.classList.contains("active-star") ? 1 : 0;
+            }
+        }
+
+        function buildQualtricsParams() {
+            stopActiveVideoTimer();
+
+            const rows = Object.values(videoLogs)
+                .map((log) => ({
+                    file: log.file,
+                    order: log.order,
+                    watchSeconds: Number(log.watchSeconds.toFixed(2)),
+                    viewCount: log.viewCount,
+                    like: log.like,
+                    favorite: log.favorite,
+                    manualPauseCount: log.manualPauseCount
+                }))
+                .filter((log) => {
+                    return log.watchSeconds > 0 || log.viewCount > 0 || log.like > 0 || log.favorite > 0 || log.manualPauseCount > 0;
+                });
+
+            const totalWatchSeconds = rows.reduce((sum, row) => sum + row.watchSeconds, 0);
+            const totalVideoViews = rows.reduce((sum, row) => sum + row.viewCount, 0);
+
+            const params = new URLSearchParams();
+            params.set("ParticipantID", participantID);
+            params.set("UserGroup", selectedGroup);
+            params.set("TotalWatchSeconds", totalWatchSeconds.toFixed(2));
+            params.set("TotalVideoViews", String(totalVideoViews));
+            params.set("VideoData", JSON.stringify(rows));
+
+            rows.slice(0, MAX_WIDE_VIDEO_ROWS).forEach((row, index) => {
+                const slot = String(index + 1).padStart(2, "0");
+                params.set(`V${slot}File`, row.file);
+                params.set(`V${slot}Order`, String(row.order));
+                params.set(`V${slot}WatchSeconds`, row.watchSeconds.toFixed(2));
+                params.set(`V${slot}ViewCount`, String(row.viewCount));
+                params.set(`V${slot}Like`, String(row.like));
+                params.set(`V${slot}Favorite`, String(row.favorite));
+                params.set(`V${slot}PauseCount`, String(row.manualPauseCount));
+            });
+
+            return params;
+        }
+
+        function sendToQualtrics() {
+            const params = buildQualtricsParams();
+            const targetUrl = `${QUALTRICS_URL}?${params.toString()}`;
+            window.location.assign(targetUrl);
+        }
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                stopActiveVideoTimer();
+            } else if (activeVideoFile) {
+                activeViewStart = Date.now();
+            }
+        });
+
+        window.addEventListener("pagehide", stopActiveVideoTimer);
+    </script>
+</body>
+</html>
