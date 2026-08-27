@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Monash University - Research Study</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; background-color: #000; overflow: hidden; }
+
+        /* --- Page 1: Consent --- */
+        #consent-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; overflow-y: auto; padding: 0 24px; }
+        .monash-header { padding: 30px 0; border-bottom: 1px solid #eef2f6; margin-bottom: 30px; text-align: center; }
+        .monash-header img { height: 50px; object-fit: contain; }
+        .consent-content { max-width: 750px; margin: 0 auto; color: #000; padding-bottom: 100px; text-align: left; }
+        .consent-title { font-size: 22px; font-weight: bold; margin-bottom: 25px; line-height: 1.3; color: #000; }
+        .info-section { margin-bottom: 20px; font-size: 14.5px; line-height: 1.6; color: #333; }
+        .project-details { margin: 20px 0; font-size: 14.5px; line-height: 1.8; }
+        .statements-title { font-weight: bold; margin: 30px 0 15px 0; font-size: 16px; border-top: 1px solid #eee; padding-top: 20px; }
+        .statement-list { list-style: none; }
+        .statement-list li { position: relative; padding-left: 30px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; color: #444; }
+        .statement-list li::before { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; position: absolute; left: 0; color: #003087; }
+        .option-group { margin-top: 35px; }
+        .option-item { display: flex; align-items: center; padding: 18px; border: 1px solid #ddd; margin-bottom: 12px; border-radius: 4px; cursor: pointer; }
+        .option-item:hover { background: #f4f7f9; border-color: #003087; }
+        .option-item input { margin-right: 15px; width: 20px; height: 20px; }
+        .option-item label { cursor: pointer; font-size: 14.5px; font-weight: 500; color: #333; }
+        .next-area { display: flex; justify-content: flex-end; margin-top: 40px; }
+        .qualtrics-btn { background-color: #003087; color: white; border: none; padding: 12px 40px; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+
+        /* --- Page 2: TikTok Feed --- */
+        #experiment-page { width: 100%; height: 100%; background: #000; display: none; position: relative; }
+        .top-nav { position: absolute; top: 0; width: 100%; display: flex; justify-content: center; align-items: center; padding-top: 40px; z-index: 100; color: rgba(255,255,255,0.6); font-size: 17px; font-weight: 600; }
+        .top-nav span { margin: 0 12px; }
+        .top-nav .active { color: #fff; position: relative; }
+        .top-nav .active::after { content: ''; position: absolute; bottom: -8px; left: 25%; width: 50%; height: 2px; background: #fff; }
+        .search-icon { position: absolute; right: 20px; font-size: 20px; color: #fff; }
+
+        #timer-box { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.5); color: #fff; padding: 5px 15px; border-radius: 20px; z-index: 1000; font-size: 12px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px); }
+
+        #video-container { width: 100%; height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; }
+        .video-card { position: relative; width: 100%; height: 100vh; scroll-snap-align: start; scroll-snap-stop: always; }
+        video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+
+        .side-bar { position: absolute; right: 12px; bottom: 120px; display: flex; flex-direction: column; align-items: center; z-index: 10; }
+        .avatar-box { position: relative; margin-bottom: 20px; }
+        .avatar-box img { width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid #fff; }
+        .plus-icon { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: #fe2c55; color: #fff; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .side-icon { margin-top: 18px; text-align: center; color: #fff; cursor: pointer; }
+        .side-icon i { font-size: 30px; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+        .side-icon span { font-size: 11px; display: block; margin-top: 4px; font-weight: 500; }
+        .active-heart { color: #fe2c55 !important; }
+        .active-star { color: #facc15 !important; }
+
+        .video-info { position: absolute; left: 16px; bottom: 105px; color: #fff; width: calc(100% - 110px); z-index: 10; pointer-events: none; }
+        .user-name { font-weight: bold; font-size: 15px; margin-bottom: 6px; }
+        .video-desc { font-size: 13.5px; line-height: 1.4; margin-bottom: 6px; }
+        .hashtags { font-weight: 600; margin-right: 5px; }
+
+        /* Yellow Cart Button */
+        .product-link {
+            position: absolute;
+            left: 16px;
+            bottom: 175px;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            max-width: 72vw;
+            min-height: 34px;
+            padding: 4px 10px 4px 5px;
+            border-radius: 6px;
+            background: rgba(30, 30, 30, 0.72);
+            color: #fff;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            border: 0.5px solid rgba(255,255,255,0.15);
+        }
+        .product-cart-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 4px;
+            background: #ff5000;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .product-cart-badge i { font-size: 13px; }
+        .product-chip-text {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .product-chip-name { overflow: hidden; text-overflow: ellipsis; }
+
+        /* --- Product Modal Sheet --- */
+        #product-detail-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            display: none;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(3px);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        #product-detail-modal.open {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            opacity: 1;
+        }
+
+        .modal-body-container {
+            width: 100%;
+            height: 84vh;
+            background: #fff;
+            border-radius: 16px 16px 0 0;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(100%);
+            transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
+        }
+        #product-detail-modal.open .modal-body-container {
+            transform: translateY(0);
+        }
+
+        /* Top Store Bar */
+        .modal-store-bar {
+            position: absolute;
+            top: -46px;
+            left: 12px;
+            right: 12px;
+            height: 42px;
+            border-radius: 12px 12px 0 0;
+            background: rgba(40, 36, 32, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 5010;
+        }
+        .store-logo-tag {
+            background: #ff2255;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 6px;
+        }
+        .store-live-tag {
+            color: #fff;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.9;
+        }
+
+        /* Scroll Content */
+        .modal-scroll-content {
+            flex: 1;
+            overflow-y: auto;
+            background: #f7f7f7;
+            position: relative;
+        }
+
+        .goods-hero-card {
+            background: #ffe3a8;
+            position: relative;
+            padding-bottom: 12px;
+            overflow: hidden;
+        }
+        .close-modal-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.35);
+            color: #fff;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        .buyer-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255,255,255,0.85);
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin: 12px 0 0 12px;
+            font-size: 11px;
+            color: #333;
+            font-weight: 500;
+        }
+        .service-tag-right {
+            position: absolute;
+            top: 12px;
+            right: 48px;
+            background: #ff4810;
+            color: #fff;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .poster-main-title {
+            color: #d12200;
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            margin: 10px 14px 6px;
+            line-height: 1.15;
+        }
+        .poster-badges {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-left: 14px;
+            margin-bottom: 8px;
+        }
+        .poster-badges span {
+            display: inline-block;
+            width: fit-content;
+            background: linear-gradient(90deg, #ff6600, #ff3700);
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
+
+        /* Showcase Visuals */
+        .poster-showcase {
+            position: relative;
+            height: 230px;
+            margin: 0 10px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+        }
+        .pack-item {
+            width: 135px;
+            height: 185px;
+            background: linear-gradient(180deg, #fff 0%, #fef3df 70%, #f3be7a 100%);
+            border: 2px solid #df9954;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .pack-tag {
+            position: absolute;
+            top: -6px;
+            right: 6px;
+            background: #d81e06;
+            color: #fff;
+            font-size: 11px;
+            font-style: italic;
+            font-weight: 900;
+            padding: 1px 6px;
+            border-radius: 3px;
+        }
+        .pack-title { font-size: 12px; font-weight: bold; color: #222; margin-top: 10px; }
+        .pack-sub { font-size: 9px; color: #e65100; font-weight: bold; margin-bottom: 4px; text-align: center; }
+        .pack-img-ph { width: 75px; height: 60px; background: #e07d38; border-radius: 6px; margin: 6px 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; }
+        .pack-weight { font-size: 9px; color: #777; margin-top: auto; }
+
+        .banner-strip {
+            background: linear-gradient(90deg, #e64a19, #f57c00);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 900;
+            border-radius: 6px;
+            margin: 8px 10px 0;
+        }
+
+        /* Price & Guarantee */
+        .modal-price-bar {
+            background: #1f1a17;
+            color: #fff;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .price-symbol { font-size: 18px; color: #fff; font-weight: bold; }
+        .price-num { font-size: 32px; font-weight: 900; line-height: 1; }
+        .price-unit { font-size: 12px; color: rgba(255,255,255,0.7); font-weight: normal; margin-left: 2px; }
+        .sales-vol { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 6px; }
+        .official-tag-box { text-align: right; }
+        .official-brand { font-size: 15px; font-weight: bold; letter-spacing: 0.5px; }
+        .official-sub { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+
+        /* Variant Options */
+        .variant-selector-row {
+            background: #fff;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .variants-list { display: flex; gap: 8px; }
+        .v-item {
+            width: 52px;
+            height: 48px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            overflow: hidden;
+            background: #fbf6ec;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9.5px;
+            color: #555;
+            text-align: center;
+            padding: 2px;
+            line-height: 1.2;
+        }
+        .v-item.active { border: 2px solid #ff2c55; color: #d81e06; font-weight: bold; }
+        .v-more { font-size: 12px; color: #888; font-weight: 500; }
+
+        /* Modal Footer */
+        .modal-bottom-bar {
+            background: #fff;
+            padding: 8px 12px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sub-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: none;
+            font-size: 10px;
+            color: #333;
+            width: 42px;
+            cursor: pointer;
+        }
+        .sub-action-btn i { font-size: 18px; margin-bottom: 2px; }
+        .sub-action-btn .brand-circle {
+            width: 20px;
+            height: 20px;
+            background: #ff2c55;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .cta-action-group {
+            flex: 1;
+            display: flex;
+            border-radius: 24px;
+            overflow: hidden;
+            height: 42px;
+        }
+        .btn-add-cart {
+            background: #ffeef2;
+            color: #ff2c55;
+            border: none;
+            width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .btn-buy-instant {
+            flex: 1;
+            background: linear-gradient(90deg, #ff4142, #ff1e56);
+            color: #fff;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .btn-buy-instant .main-p { font-size: 14px; font-weight: bold; }
+        .btn-buy-instant .sub-p { font-size: 10px; opacity: 0.9; }
+
+        /* Submit Button Area */
+        .bottom-action-area { position: absolute; bottom: 0; width: 100%; height: 90px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1001; }
+        #submit-btn { background: #333; color: #888; border: none; padding: 12px 60px; border-radius: 4px; font-weight: bold; font-size: 16px; cursor: not-allowed; transition: 0.3s; }
+        #submit-btn.ready { background: #fe2c55; color: #fff; cursor: pointer; }
+        .bottom-fake-nav { position: absolute; bottom: 0; width: 100%; height: 50px; border-top: 0.5px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; align-items: center; color: #888; font-size: 10px; z-index: 100; pointer-events: none; }
+        .nav-item { text-align: center; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 2px; }
+        .nav-item.white { color: #fff; }
+    </style>
+</head>
+<body>
+
+    <!-- Consent Page -->
+    <div id="consent-page">
+        <div class="monash-header">
+            <img src="https://raw.githubusercontent.com/iamnotskylar17-bot/Experiment/main/monash-logo.svg" alt="Monash Logo">
+        </div>
+        <div class="consent-content">
+            <h1 class="consent-title">Participant Information Statement</h1>
+            <div class="info-section">
+                <p>Dear Participant,</p>
+                <p>You are invited to participate in this research project conducted by Monash University.</p>
+            </div>
+            <div class="project-details">
+                <p><strong>Project ID: 44026</strong></p>
+                <p><strong>Project title: The Illusion of Plenty: AI-Driven Content Abundance in Social Media Fatigue</strong></p>
+                <p><strong>Contact: Si Yang (si.yang@monash.edu)</strong></p>
+            </div>
+            <div class="statements-title">Consent Declaration</div>
+            <ul class="statement-list">
+                <li>I am aged 18 years or older.</li>
+                <li>I agree to participate in this research and provide feedback.</li>
+                <li>I understand my participation is voluntary.</li>
+            </ul>
+            <div class="option-group">
+                <div class="option-item" onclick="document.getElementById('c-yes').checked=true">
+                    <input type="radio" name="consent" id="c-yes">
+                    <label for="c-yes">Yes, I agree to participate.</label>
+                </div>
+                <div class="option-item" onclick="document.getElementById('c-no').checked=true">
+                    <input type="radio" name="consent" id="c-no">
+                    <label for="c-no">No, I do not agree.</label>
+                </div>
+            </div>
+            <div class="next-area">
+                <button class="qualtrics-btn" onclick="handleConsent()">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feed Page -->
+    <div id="experiment-page">
+        <div id="timer-box">Please browse for <span id="sec">30</span>s to unlock</div>
+        <div class="top-nav">
+            <span>Trending</span><span>Following</span><span class="active">For You</span>
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        </div>
+        
+        <div id="video-container"></div>
+        
+        <div class="bottom-action-area">
+            <button id="submit-btn" onclick="sendToQualtrics()" disabled>Finish (Locked)</button>
+            <div class="bottom-fake-nav">
+                <div class="nav-item white"><i class="fa-solid fa-house"></i>Home</div>
+                <div class="nav-item"><i class="fa-solid fa-users"></i>Friends</div>
+                <div class="nav-item"><i class="fa-solid fa-circle-plus" style="font-size:26px; color:#fff"></i></div>
+                <div class="nav-item"><i class="fa-solid fa-comment-dots"></i>Inbox</div>
+                <div class="nav-item"><i class="fa-solid fa-user"></i>Profile</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div id="product-detail-modal" onclick="closeProductDetail(event)">
+        <div class="modal-body-container" onclick="event.stopPropagation()">
+            
+            <!-- Top Store Bar -->
+            <div class="modal-store-bar">
+                <div style="display:flex; align-items:center;">
+                    <span class="store-logo-tag">PetJoy</span>
+                    <span>PetJoy Official Store · Recommended</span>
+                </div>
+                <div class="store-live-tag">
+                    <i class="fa-solid fa-chart-simple"></i> Live Now ›
+                </div>
+            </div>
+
+            <!-- Scrollable Content -->
+            <div class="modal-scroll-content">
+                <section class="goods-hero-card">
+                    <button class="close-modal-btn" onclick="closeProductDetail(event)">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    
+                    <div class="buyer-tag">
+                        <i class="fa-solid fa-circle-user" style="color:#aaa;"></i>
+                        <span>Alex** placed an order 6m ago!</span>
+                    </div>
+                    <div class="service-tag-right">10M+ Happy Pets</div>
+
+                    <h2 class="poster-main-title" id="modal-product-name">Krill & Fresh Meat High-Protein Cat Food</h2>
+                    
+                    <div class="poster-badges">
+                        <span>60% Fresh Meat Content</span>
+                        <span>Fish Oil + Krill Oil</span>
+                    </div>
+
+                    <div class="poster-showcase">
+                        <div class="pack-item">
+                            <span class="pack-tag">Pro+</span>
+                            <div class="pack-title">PetJoy Pro</div>
+                            <div class="pack-sub">Krill & Fresh Meat Formula</div>
+                            <div class="pack-img-ph"><i class="fa-solid fa-paw"></i></div>
+                            <div class="pack-weight">Net Wt: 4kg</div>
+                        </div>
+                        <div class="pack-item" style="transform: scale(0.92); opacity: 0.95;">
+                            <span class="pack-tag">Pro+</span>
+                            <div class="pack-title">PetJoy Pro</div>
+                            <div class="pack-sub">Baked Balanced Recipe</div>
+                            <div class="pack-img-ph" style="background:#cc6729;"><i class="fa-solid fa-cat"></i></div>
+                            <div class="pack-weight">Net Wt: 4kg</div>
+                        </div>
+                    </div>
+
+                    <div class="banner-strip">
+                        <span>Trial Pack Guarantee · Full Refund If Refused</span>
+                        <span style="font-size: 11px; font-weight: normal;">Fresh Batch · 18M Shelf Life</span>
+                    </div>
+                </section>
+
+                <div class="modal-price-bar">
+                    <div>
+                        <div>
+                            <span class="price-symbol">$</span>
+                            <span class="price-num" id="modal-product-price">24.99</span>
+                            <span class="price-unit">/ 4kg</span>
+                        </div>
+                        <div class="sales-vol" id="modal-product-sold">Sold 100K+</div>
+                    </div>
+                    <div class="official-tag-box">
+                        <div class="official-brand">TikTok Shop</div>
+                        <div class="official-sub">Official Brand ›</div>
+                    </div>
+                </div>
+
+                <div class="variant-row variant-selector-row">
+                    <div class="variants-list">
+                        <div class="v-item active">Krill Meat<br>4kg</div>
+                        <div class="v-item">Baked Formula<br>4kg</div>
+                        <div class="v-item">Kitten Growth<br>2kg</div>
+                    </div>
+                    <div class="v-more">3 options ›</div>
+                </div>
+            </div>
+
+            <!-- Bottom Action Bar -->
+            <div class="modal-bottom-bar">
+                <button class="sub-action-btn" type="button" onclick="recordAction('store')">
+                    <span class="brand-circle">P</span>
+                    Store
+                </button>
+                <button class="sub-action-btn" type="button" onclick="recordAction('service')">
+                    <i class="fa-regular fa-comment-dots"></i>
+                    Chat
+                </button>
+                <div class="cta-action-group">
+                    <button class="btn-add-cart" type="button" onclick="recordAction('add_to_cart')" aria-label="Add to cart">
+                        <i class="fa-solid fa-cart-plus"></i>
+                    </button>
+                    <button class="btn-buy-instant" type="button" onclick="recordAction('buy_now')">
+                        <span class="main-p" id="modal-btn-price">$24.99 · Buy Now</span>
+                        <span class="sub-p">Order Now · Fast Delivery</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const QUALTRICS_URL = "https://monash.syd1.qualtrics.com/jfe/form/SV_2iBbNbqJ0fByavs";
+        const GITHUB_USER = "iamnotskylar17-bot";
+        const GROUP_CONFIG = {
+            'Group1': ['1.MP4', '2.MP4', '3.MP4'],
+            'Group2': ['1.MP4', '2.MP4', '3.MP4', '4.MP4']
+        };
+
+        const PRODUCT_CONFIG = {
+            '1.MP4': { id: 'petjoy_krill_4kg', name: 'Krill & Fresh Meat High-Protein Cat Food', sold: 'Sold 100K+', price: '24.99', label: 'PetJoy Krill Meat Cat Food · 4kg' },
+            '2.MP4': { id: 'petjoy_duck_4kg', name: 'Duck & Tuna Coat Care Cat Food', sold: 'Sold 85K+', price: '26.99', label: 'PetJoy Duck & Tuna Recipe · 4kg' },
+            '3.MP4': { id: 'petjoy_kitten_2kg', name: 'Kitten Growth & Bone Support Cat Food', sold: 'Sold 120K+', price: '18.99', label: 'PetJoy Kitten Formula · 2kg' },
+            '4.MP4': { id: 'petjoy_hairball_4kg', name: 'Hairball Control & Digestion Cat Food', sold: 'Sold 60K+', price: '27.99', label: 'PetJoy Hairball Control · 4kg' }
+        };
+
+        const REPO_LIST = Object.keys(GROUP_CONFIG);
+        const selectedGroup = REPO_LIST[Math.floor(Math.random() * REPO_LIST.length)];
+        const VIDEO_FILES = GROUP_CONFIG[selectedGroup];
+        const GITHUB_BASE = `https://raw.githubusercontent.com/${GITHUB_USER}/${selectedGroup}/main/`;
+
+        let participantID = 'SK-' + Math.floor(Math.random() * 9999);
+        let logs = {};
+        let eventLogs = [];
+        let viewStart;
+        let participantStart = Date.now();
+        let activeProductVideo = null;
+
+        function handleConsent() {
+            if(!document.getElementById('c-yes').checked) return alert("Please consent to continue.");
+            document.getElementById('consent-page').style.display = 'none';
+            document.getElementById('experiment-page').style.display = 'block';
+            render();
+            startTimer();
+        }
+
+        function render() {
+            const container = document.getElementById('video-container');
+            VIDEO_FILES.forEach(f => {
+                const product = PRODUCT_CONFIG[f] || PRODUCT_CONFIG['1.MP4'];
+                logs[f] = { duration: 0, L: 0, F: 0, P: 0, productId: product.id, productClicks: 0, productClickTimes: [] };
+                
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                card.dataset.file = f;
+                card.innerHTML = `
+                    <video loop playsinline preload="metadata" onclick="togglePlay(this, '${f}')">
+                        <source src="${GITHUB_BASE}${f}" type="video/mp4">
+                    </video>
+                    
+                    <div class="side-bar">
+                        <div class="avatar-box">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${f}">
+                            <div class="plus-icon"><i class="fa-solid fa-plus"></i></div>
+                        </div>
+                        <div class="side-icon" onclick="act(this,'${f}','L')">
+                            <i class="fa-solid fa-heart"></i>
+                            <span>${formatCount(Math.random()*1000000)}</span>
+                        </div>
+                        <div class="side-icon" onclick="act(this,'${f}','C')">
+                            <i class="fa-solid fa-comment-dots"></i>
+                            <span>${Math.floor(Math.random()*5000)}</span>
+                        </div>
+                        <div class="side-icon" onclick="act(this,'${f}','F')">
+                            <i class="fa-solid fa-star"></i>
+                            <span>${formatCount(Math.random()*100000)}</span>
+                        </div>
+                        <div class="side-icon">
+                            <i class="fa-solid fa-share"></i>
+                            <span>${Math.floor(Math.random()*1000)}</span>
+                        </div>
+                    </div>
+
+                    <!-- Direct Click to Product Details -->
+                    <button class="product-link" type="button" onclick="openProductDetail(event, '${f}')">
+                        <span class="product-cart-badge"><i class="fa-solid fa-cart-shopping"></i></span>
+                        <span class="product-chip-text">
+                            <span class="product-chip-name">${product.label}</span>
+                        </span>
+                    </button>
+
+                    <div class="video-info">
+                        <div class="user-name">@PetJoy_Official</div>
+                        <div class="video-desc">High-protein krill & meat recipe for happy, healthy cats! <span class="hashtags">#CatFood #PetCare #TikTokShop</span></div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            initObs();
+        }
+
+        function formatCount(n) {
+            if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+            if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+            return `${Math.floor(n)}`;
+        }
+
+        function openProductDetail(event, f) {
+            if(event) event.stopPropagation();
+            const product = PRODUCT_CONFIG[f] || PRODUCT_CONFIG['1.MP4'];
+            activeProductVideo = f;
+
+            // Tracking Click
+            logs[f].productClicks = (logs[f].productClicks || 0) + 1;
+            logs[f].productClickTimes.push({ timestamp: new Date().toISOString(), elapsedMs: Date.now() - participantStart });
+            recordEvent('open_product_modal', f, { productId: product.id });
+
+            // Populate Content
+            document.getElementById('modal-product-name').innerText = product.name;
+            document.getElementById('modal-product-price').innerText = product.price;
+            document.getElementById('modal-product-sold').innerText = product.sold;
+            document.getElementById('modal-btn-price').innerText = `$${product.price} · Buy Now`;
+
+            // Open Modal Sheet
+            const modal = document.getElementById('product-detail-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('open'), 10);
+        }
+
+        function closeProductDetail(event) {
+            if(event) event.stopPropagation();
+            const modal = document.getElementById('product-detail-modal');
+            modal.classList.remove('open');
+            setTimeout(() => { modal.style.display = 'none'; }, 260);
+            if(activeProductVideo) {
+                recordEvent('close_product_modal', activeProductVideo);
+            }
+        }
+
+        function recordAction(actionType) {
+            if (!activeProductVideo) return;
+            recordEvent('product_action', activeProductVideo, { actionType });
+            if(actionType === 'buy_now') {
+                alert('Purchase intent recorded.');
+            } else if(actionType === 'add_to_cart') {
+                alert('Added to cart.');
+            }
+        }
+
+        function recordEvent(eventName, f, extra = {}) {
+            eventLogs.push({
+                event: eventName,
+                participantID,
+                videoId: f,
+                timestamp: new Date().toISOString(),
+                elapsedMs: Date.now() - participantStart,
+                ...extra
+            });
+        }
+
+        function togglePlay(v, f) {
+            if(v.paused) { v.play(); } else { v.pause(); logs[f].P++; }
+        }
+
+        function initObs() {
+            const obs = new IntersectionObserver((es) => {
+                es.forEach(e => {
+                    const v = e.target.querySelector('video');
+                    const f = e.target.dataset.file;
+                    if (e.isIntersecting && v) {
+                        document.querySelectorAll('video').forEach(vid => vid.pause());
+                        v.play().catch(() => { v.muted = true; v.play(); });
+                        viewStart = Date.now();
+                    } else if (v && viewStart > 0) {
+                        v.pause();
+                        logs[f].duration += (Date.now() - viewStart) / 1000;
+                        viewStart = 0;
+                    }
+                });
+            }, { threshold: 0.6 });
+            document.querySelectorAll('.video-card').forEach(c => obs.observe(c));
+        }
+
+        function startTimer() {
+            let left = 30;
+            const btn = document.getElementById('submit-btn');
+            const timerBox = document.getElementById('timer-box');
+            const t = setInterval(() => {
+                left--; 
+                document.getElementById('sec').innerText = left;
+                if(left <= 0) { 
+                    clearInterval(t); 
+                    btn.disabled = false;
+                    btn.innerText = "Submit & Finish";
+                    btn.classList.add('ready');
+                    timerBox.innerHTML = "Requirement met. You can submit now.";
+                    timerBox.style.background = "rgba(46, 204, 113, 0.6)";
+                }
+            }, 1000);
+        }
+
+        function act(el, f, type) {
+            if(type === 'L') { el.classList.toggle('active-heart'); logs[f].L = el.classList.contains('active-heart') ? 1 : 0; }
+            if(type === 'F') { el.classList.toggle('active-star'); logs[f].F = el.classList.contains('active-star') ? 1 : 0; }
+        }
+
+        function sendToQualtrics() {
+            if (viewStart > 0) {
+                const activeCard = [...document.querySelectorAll('.video-card')].find(c => c.getBoundingClientRect().top >= 0 && c.getBoundingClientRect().top < window.innerHeight);
+                if (activeCard) { logs[activeCard.dataset.file].duration += (Date.now() - viewStart) / 1000; }
+            }
+            const summary = Object.keys(logs).map(f => `${f}:${logs[f].duration.toFixed(1)}s,L:${logs[f].L},F:${logs[f].F},P:${logs[f].P},Clicks:${logs[f].productClicks}`).join('||');
+            window.location.href = `${QUALTRICS_URL}?ParticipantID=${participantID}&UserGroup=${selectedGroup}&VideoData=${encodeURIComponent(summary)}&EventData=${encodeURIComponent(JSON.stringify(eventLogs))}`;
+        }
+    </script>
+</body>
+</html>
