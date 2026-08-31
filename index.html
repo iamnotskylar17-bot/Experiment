@@ -53,16 +53,45 @@
         .active-heart { color: #fe2c55 !important; }
         .active-star { color: #facc15 !important; }
 
-        .video-info { position: absolute; left: 16px; bottom: 105px; color: #fff; width: calc(100% - 110px); z-index: 10; pointer-events: none; }
+        .video-info { position: absolute; left: 16px; bottom: 100px; color: #fff; width: calc(100% - 110px); z-index: 10; pointer-events: none; }
         .user-name { font-weight: bold; font-size: 15px; margin-bottom: 6px; }
-        .video-desc { font-size: 13.5px; line-height: 1.4; margin-bottom: 6px; }
+        .video-desc { font-size: 13.5px; line-height: 1.4; margin-bottom: 8px; }
         .hashtags { font-weight: 600; margin-right: 5px; }
+
+        /* AI-Generated Content Notice Tag */
+        .ai-disclaimer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(30, 30, 30, 0.72);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+            letter-spacing: 0.1px;
+            pointer-events: auto;
+            cursor: pointer;
+            margin-top: 2px;
+            width: fit-content;
+        }
+        .ai-disclaimer-badge i.fa-bullhorn {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .ai-disclaimer-badge i.fa-chevron-right {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: 1px;
+        }
 
         /* Yellow Cart Button */
         .product-link {
             position: absolute;
             left: 16px;
-            bottom: 175px;
+            bottom: 195px;
             z-index: 30;
             display: flex;
             align-items: center;
@@ -434,35 +463,51 @@
     <!-- Consent Page -->
     <div id="consent-page">
         <div class="monash-header">
-            <img src="https://raw.githubusercontent.com/iamnotskylar17-bot/Experiment/main/monash-logo.svg" alt="Monash Logo">
+            <img src="https://raw.githubusercontent.com/iamnotskylar17-bot/Experiment/main/monash-logo.svg" alt="Monash University Logo">
         </div>
         <div class="consent-content">
             <h1 class="consent-title">Participant Information Statement</h1>
+            
             <div class="info-section">
                 <p>Dear Participant,</p>
-                <p>You are invited to participate in this research project conducted by Monash University.</p>
+                <p>You are invited to participate in this research project conducted by Monash University. Before deciding whether to participate, please read this information statement carefully and in full. If you would like to obtain any additional information about this project, please feel free to contact the researcher via the email address provided below.</p>
             </div>
+
             <div class="project-details">
-                <p><strong>Project ID: 44026</strong></p>
-                <p><strong>Project title: The Illusion of Plenty: AI-Driven Content Abundance in Social Media Fatigue</strong></p>
-                <p><strong>Contact: Si Yang (si.yang@monash.edu)</strong></p>
+                <p><strong>Project ID: XXXXX</strong></p>
+                <p><strong>Project title: The Illusion of Plenty: AI-Driven Content Abundance, Perceived Overload, and Manipulative Intent in Social Media Fatigue</strong></p>
+                <p><strong>Project Contact: Si Yang (PhD Candidate)</strong></p>
+                <p><strong>Email: si.yang@monash.edu</strong></p>
             </div>
+
             <div class="statements-title">Consent Declaration</div>
-            <ul class="statement-list">
-                <li>I am aged 18 years or older.</li>
-                <li>I agree to participate in this research and provide feedback.</li>
-                <li>I understand my participation is voluntary.</li>
-            </ul>
+            <div class="info-section">
+                <p>I have been invited to participate in the above-mentioned research project conducted by Monash University, and I have read and understood the Participant Information Statement. I hereby confirm that:</p>
+                <ul class="statement-list">
+                    <li>I am aged 18 years or older.</li>
+                    <li>I am an active user of social media (e.g., TikTok, Instagram, etc.).</li>
+                    <li>I agree to participate in this research and to provide research data through an online questionnaire.</li>
+                    <li>I understand that participation in this research is voluntary, and that I may withdraw at any time before submitting the questionnaire without providing any reason.</li>
+                    <li>I understand that once the questionnaire has been submitted, the submitted data cannot be withdrawn.</li>
+                    <li>I understand that there are no right or wrong answers in this questionnaire, and I will answer based on my genuine situation and actual experiences.</li>
+                    <li>I understand that the information I provide will be kept confidential.</li>
+                    <li>I understand that no personally identifiable information, including my name, will appear in research reports or academic publications.</li>
+                    <li>I understand that the data collected in this study may be de-identified and used for academic research and publications.</li>
+                    <li>I understand that by ticking the "Yes" box below, I am providing my informed consent to participate.</li>
+                </ul>
+            </div>
+
             <div class="option-group">
                 <div class="option-item" onclick="document.getElementById('c-yes').checked=true">
                     <input type="radio" name="consent" id="c-yes">
-                    <label for="c-yes">Yes, I agree to participate.</label>
+                    <label for="c-yes">Yes, I have read and understood the information and agree to participate.</label>
                 </div>
                 <div class="option-item" onclick="document.getElementById('c-no').checked=true">
                     <input type="radio" name="consent" id="c-no">
-                    <label for="c-no">No, I do not agree.</label>
+                    <label for="c-no">No, I do not agree to participate.</label>
                 </div>
             </div>
+
             <div class="next-area">
                 <button class="qualtrics-btn" onclick="handleConsent()">Next →</button>
             </div>
@@ -664,7 +709,7 @@
                             <i class="fa-solid fa-star"></i>
                             <span>${formatCount(Math.random()*100000)}</span>
                         </div>
-                        <div class="side-icon">
+                        <div class="side-icon" onclick="act(this,'${f}','Share')">
                             <i class="fa-solid fa-share"></i>
                             <span>${Math.floor(Math.random()*1000)}</span>
                         </div>
@@ -681,6 +726,13 @@
                     <div class="video-info">
                         <div class="user-name">@PetJoy_Official</div>
                         <div class="video-desc">High-protein krill & meat recipe for happy, healthy cats! <span class="hashtags">#CatFood #PetCare #TikTokShop</span></div>
+                        
+                        <!-- AI Disclosure Badge as shown in reference -->
+                        <div class="ai-disclaimer-badge">
+                            <i class="fa-solid fa-bullhorn"></i>
+                            <span>Creator statement: Content generated by AI</span>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
                     </div>
                 `;
                 container.appendChild(card);
